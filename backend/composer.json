@@ -1,0 +1,19 @@
+{
+    "name": "juan-j/alix-sport",
+    "description": "Proyecto Backend para el desarrollo de una web de venta de suplementos deportivos",
+    "autoload": {
+        "psr-4": {
+            "JuanJ\\AlixSport\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Juan Jose Duran Rincon",
+            "email": "jduranrinconcampus@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+        "phpmailer/phpmailer": "^7.0"
+    }
+}
