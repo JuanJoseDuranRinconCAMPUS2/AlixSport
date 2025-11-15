@@ -86,6 +86,7 @@ export default function VerificationCode({ email, onBackToEmail, onVerificationS
               onChange={(e) => setNewPassword(e.target.value)}
               className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Mínimo 6 caracteres"
+              minLength={6}
               required
             />
           </div>
@@ -98,6 +99,7 @@ export default function VerificationCode({ email, onBackToEmail, onVerificationS
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Repite tu contraseña"
+              minLength={6}
               required
             />
           </div>

@@ -33,7 +33,6 @@ export default function LoginPage({
         ); 
         
         if (data.status == 'ok') {
-          console.log('HOLA');
           console.log(data);
           setPopup({
             status: data.status,
@@ -150,7 +149,6 @@ export default function LoginPage({
             </button>
           </p>
 
-          {/* Enlace para recuperar contraseña */}
           <p className="text-center text-sm text-gray-400 mt-3">
             <button 
               onClick={onForgotPasswordClick}
