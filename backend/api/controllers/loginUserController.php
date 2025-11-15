@@ -66,12 +66,12 @@ class loginUserController {
                 "emailRegistro.html", 
                 "Registro exitoso en AlixSpor", 
                 [
-                    'nombre' => $nombre,
-                    'email' => $email
+                    'nombre' => $data["nombre"],
+                    'email' => $data["email"]
                 ]
             );
 
-            echo json_encode(["status" => "ok", "mensaje" => `El Usuario se ha creado correctamente, revisa el correo para ver mas información`]);
+            echo json_encode(["status" => "ok", "mensaje" => "El Usuario se ha creado correctamente, revisa el correo para ver mas información"]);
         } catch (PDOException $e) {
             echo json_encode(["status" => "error", "mensaje" => $e->getMessage()]);
         }
