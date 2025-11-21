@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/database.php';
-
+require_once __DIR__ . "/../models/pdfFactura.php";
 
 class carritoController {
 
@@ -241,6 +241,67 @@ class carritoController {
 
         } catch (PDOException $e) {
             echo json_encode(["error" => "Error al vaciar carrito: " . $e->getMessage()]);
+        }
+    }
+
+    public function generarFacturaPDF() {
+        header('Content-Type: application/json');
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $idUsuario = $data["idUsuario"] ?? null;
+
+        if (!$idUsuario) {
+            echo json_encode(["status" => "error", "mensaje" => "Falta el idUsuario"]);
+            return;
+        }
+
+        try {
+            
+            ob_start();
+            $this->getDetallesByUser();
+            $detallesJSON = ob_get_clean();
+            $productos = json_decode($detallesJSON, true);
+
+            if (!is_array($productos)) {
+                echo json_encode(["status" => "error", "mensaje" => "Error obteniendo detalles"]);
+                return;
+            }
+
+            ob_start();
+            $this->getTotalCarrito();
+            $totalJSON = ob_get_clean();
+            $infoCarrito = json_decode($totalJSON, true);
+
+            $total = $infoCarrito["total"];
+            $idCarrito = $infoCarrito["idCarrito"];
+
+            $sqlUser = "SELECT nombre_Usuario FROM usuarios WHERE id_Usuario = ?";
+            $stmtUser = $this->conn->prepare($sqlUser);
+            $stmtUser->execute([$idUsuario]);
+            $usuario = $stmtUser->fetch(PDO::FETCH_ASSOC)["nombre_Usuario"];
+
+            $html = PdfFacturaModel::generarHTML($usuario, $productos, $total);
+
+            $dompdf = new Dompdf\Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->set_option('isRemoteEnabled', true);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+
+            $nombrePDF = "Factura_User_" . $idUsuario . "_" . time() . ".pdf";
+            $rutaArchivo = __DIR__ . "/../facturas/" . $nombrePDF;
+            file_put_contents($rutaArchivo, $dompdf->output());
+
+            $url = $_ENV["HOSTNAME"] . ":" . $_ENV["PORT_BACKEND"] . "/facturas/" . $nombrePDF;
+
+            echo json_encode([
+                "status" => "ok",
+                "mensaje" => "Factura generada correctamente",
+                "urlFactura" => $url
+            ]);
+
+        } catch (Exception $e) {
+            echo json_encode(["status" => "error", "mensaje" => "Error al generar factura: " . $e->getMessage()]);
         }
     }
 

@@ -24,6 +24,7 @@
     $router->post('/carritos', 'carritoController@postCarrito');
     $router->delete('/carritos', 'carritoController@deleteDetalleCarrito');
     $router->delete('/vaciarCarrito', 'carritoController@vaciarCarrito');
+    $router->post('/generarFactura', 'carritoController@generarFacturaPDF');
 
     //Rutas Login
     $router->get('/hola', 'loginUserController@saludar');
