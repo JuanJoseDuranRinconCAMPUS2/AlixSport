@@ -67,17 +67,62 @@ class carritoController {
                 WHERE c.id_Usuario = ?
             ");
             $stmt->execute([$id]);
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $detalles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if (empty($result)) {
-                http_response_code(404);
-                echo json_encode(["mensaje" => "El usuario no tiene productos en el carrito"]);
+            if (empty($detalles)) {
+                echo json_encode([
+                    "detalle" => [],
+                    "resumen" => [
+                        "productos_diferentes" => 0,
+                        "total_items" => 0,
+                        "valor_total" => 0
+                    ]
+                ]);
                 return;
             }
 
-            echo json_encode($result);
+            $stmtResumen = $this->conn->prepare("
+                SELECT 
+                    COUNT(*) AS productos_diferentes,
+                    SUM(cd.cantidad) AS total_items,
+                    SUM(cd.subtotal) AS valor_total
+                FROM carrito c
+                INNER JOIN carrito_detalle cd ON c.id_Carrito = cd.id_Carrito
+                WHERE c.id_Usuario = ?
+            ");
+            $stmtResumen->execute([$id]);
+            $resumen = $stmtResumen->fetch(PDO::FETCH_ASSOC);
+
+            // Respuesta combinada
+            echo json_encode([
+                "detalle" => $detalles,
+                "resumen" => $resumen
+            ]);
         } catch (PDOException $e) {
             echo json_encode(["error" => "Error al obtener detalles: " . $e->getMessage()]);
+        }
+    }
+
+    public function getCantidadProductos() {
+        header('Content-Type: application/json');
+        $data = json_decode(file_get_contents('php://input'), true);
+        $id = $data['idUsuario'];
+
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    COUNT(*) AS productos_diferentes,
+                    COALESCE(SUM(cd.cantidad), 0) AS total_items
+                FROM carrito c
+                INNER JOIN carrito_detalle cd ON c.id_Carrito = cd.id_Carrito
+                WHERE c.id_Usuario = ?
+            ");
+            $stmt->execute([$id]);
+            $cantidad = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            echo json_encode($cantidad);
+        } catch (PDOException $e) {
+            echo json_encode(["error" => "Error al obtener cantidad: " . $e->getMessage()]);
         }
     }
 
@@ -159,7 +204,6 @@ class carritoController {
             } else {
                 $idCarrito = $carrito['id_Carrito'];
             }
-
             $sqlPrecio = "SELECT precio_Producto FROM productos WHERE id_Producto = ?";
             $stmtPrecio = $this->conn->prepare($sqlPrecio);
             $stmtPrecio->execute([$idProducto]);
@@ -184,6 +228,94 @@ class carritoController {
             echo json_encode(["error" => "Error al crear carrito: " . $e->getMessage()]);
         }
     }
+
+    public function updateCantidadCarrito() {
+        header('Content-Type: application/json');
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        if (!isset($data['idUsuario']) || !isset($data['idProducto']) || !isset($data['cantidad'])) {
+            echo json_encode(["error" => "Faltan datos: idUsuario, idProducto o cantidad"]);
+            return;
+        }
+
+        $idUsuario = $data['idUsuario'];
+        $idProducto = $data['idProducto'];
+        $cantidad = $data['cantidad'];
+
+        try {
+
+            if (!$this->isUsuarioId($idUsuario)) {
+                echo json_encode(["error" => "Usuario no encontrado"]);
+                return;
+            }
+
+            $stmt = $this->conn->prepare("SELECT id_Carrito FROM carrito WHERE id_Usuario = ?");
+            $stmt->execute([$idUsuario]);
+            $carrito = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$carrito) {
+                $stmt = $this->conn->prepare("INSERT INTO carrito (id_Usuario) VALUES (?)");
+                $stmt->execute([$idUsuario]);
+                $idCarrito = $this->conn->lastInsertId();
+            } else {
+                $idCarrito = $carrito['id_Carrito'];
+            }
+
+            $stmt = $this->conn->prepare("
+                SELECT id, cantidad 
+                FROM carrito_detalle 
+                WHERE id_Carrito = ? AND id_Producto = ?
+            ");
+            $stmt->execute([$idCarrito, $idProducto]);
+            $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($cantidad == 0) {
+                if ($detalle) {
+                    $stmt = $this->conn->prepare("DELETE FROM carrito_detalle WHERE id = ?");
+                    $stmt->execute([$detalle['id']]);
+                }
+                echo json_encode(["mensaje" => "Producto eliminado del carrito"]);
+                return;
+            }
+
+            $stmt = $this->conn->prepare("SELECT precio_Producto FROM productos WHERE id_Producto = ?");
+            $stmt->execute([$idProducto]);
+            $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$producto) {
+                echo json_encode(["error" => "Producto no encontrado"]);
+                return;
+            }
+
+            $precioUnitario = $producto['precio_Producto'];
+
+            if ($detalle) {
+                $stmt = $this->conn->prepare("
+                    UPDATE carrito_detalle 
+                    SET cantidad = ?, precio_unitario = ?
+                    WHERE id = ?
+                ");
+                $stmt->execute([$cantidad, $precioUnitario, $detalle['id']]);
+
+                echo json_encode(["mensaje" => "Cantidad actualizada"]);
+            } 
+
+            else {
+                $stmt = $this->conn->prepare("
+                    INSERT INTO carrito_detalle (id_Carrito, id_Producto, cantidad, precio_unitario)
+                    VALUES (?, ?, ?, ?)
+                ");
+                $stmt->execute([$idCarrito, $idProducto, $cantidad > 0 ? $cantidad : 1, $precioUnitario]);
+
+                echo json_encode(["mensaje" => "Producto agregado al carrito"]);
+            }
+
+        } catch (PDOException $e) {
+            http_response_code(400);
+            echo json_encode(["error" => "Error al actualizar el carrito: " . $e->getMessage()]);
+        }
+    }
+
 
     public function deleteDetalleCarrito() {
         header('Content-Type: application/json');

@@ -14,10 +14,33 @@ class productosController {
 
     public function getProductos() {
         header('Content-Type: application/json');
-        $stmt = $this->conn->prepare("SELECT * FROM productos ORDER BY id_Producto");
+        $stmt = $this->conn->prepare("SELECT p.id_Producto, p.nombre_Producto, p.descripcion_Producto, p.sabor_Producto, c.nombre_Categoria AS categoria_Producto,
+            p.precio_Producto, p.stock_Producto, p.imagen_Producto, p.fecha_Creacion_Producto
+            FROM productos p
+            INNER JOIN categorias c ON p.categoria_Producto = c.id_Categoria"
+        );
         $stmt->execute();
         $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($productos as &$producto) {
+            $saboresArray = [];
 
+            if (!empty($producto['sabor_Producto'])) {
+                $ids = explode(",", $producto['sabor_Producto']);
+                $placeholders = implode(",", array_fill(0, count($ids), "?"));
+
+                $stmtSab = $this->conn->prepare("
+                    SELECT id_Sabor, nombre_Sabor 
+                    FROM sabores 
+                    WHERE id_Sabor IN ($placeholders)
+                ");
+                $stmtSab->execute($ids);
+                $saboresArray = $stmtSab->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            $producto['sabores'] = $saboresArray;
+            unset($producto['sabor_Producto']);
+        }
         echo json_encode($productos);
     }
 
@@ -32,11 +55,28 @@ class productosController {
             return;
         }
 
-        $stmt = $this->conn->prepare("SELECT * FROM productos WHERE id_Producto = ?");
+        $stmt = $this->conn->prepare("SELECT p.id_Producto, p.nombre_Producto, p.descripcion_Producto, p.sabor_Producto, c.nombre_Categoria AS categoria_Producto,
+            p.precio_Producto, p.stock_Producto, p.imagen_Producto, p.fecha_Creacion_Producto
+            FROM productos p
+            INNER JOIN categorias c ON p.categoria_Producto = c.id_Categoria
+            WHERE id_Producto = ?"
+        );
         $stmt->execute([$id]);
         $producto = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($producto) {
+            $saboresArray = [];
+            if (!empty($producto['sabor_Producto'])) {
+                $ids = explode(",", $producto['sabor_Producto']);
+                $placeholders = implode(",", array_fill(0, count($ids), "?"));
+
+                $stmtSab = $this->conn->prepare("SELECT id_Sabor, nombre_Sabor FROM sabores WHERE id_Sabor IN ($placeholders)");
+                $stmtSab->execute($ids);
+                $saboresArray = $stmtSab->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            $producto['sabores'] = $saboresArray;
+            unset($producto['sabor_Producto']);  
             echo json_encode($producto);
         } else {
             http_response_code(404);

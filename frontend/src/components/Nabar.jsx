@@ -1,8 +1,8 @@
-import { ShoppingCart, User } from "lucide-react";
+import { ShoppingCart, User, Settings } from "lucide-react";
 import logo from "../assets/axil par.png";
 
-export default function Navbar({ user, onLoginClick, onRegisterClick, onLogout }) {
-  
+export default function Navbar({ user, onLoginClick, onRegisterClick, onLogout, cartItemsCount, onCartClick, onAdminClick }) {
+  const ROL_ADMIN = "CsWscEhqmr1987";
   return (
     <nav className="fixed top-0 left-0 w-full bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm text-white py-4 px-8 flex justify-between items-center z-50">
       
@@ -14,6 +14,16 @@ export default function Navbar({ user, onLoginClick, onRegisterClick, onLogout }
       <div className="flex items-center space-x-6 text-sm font-semibold">
         <a href="#" className="text-black hover:text-gray-100 bg-lime-600 px-3 py-2 rounded">Catálogo</a>
 
+        {user && user.rol === ROL_ADMIN && (
+          <button 
+            onClick={onAdminClick}
+            className="text-white hover:text-gray-100 bg-purple-600 hover:bg-purple-500 px-3 py-2 rounded flex items-center gap-2"
+          >
+            <Settings size={16} />
+            Panel Admin
+          </button>
+        )}
+
         {!user && (
           <button 
             onClick={onRegisterClick}
@@ -24,8 +34,13 @@ export default function Navbar({ user, onLoginClick, onRegisterClick, onLogout }
         )}
 
         <div className="flex items-center space-x-4">
-          <button className="hover:text-lime-400 transition">
+          <button onClick={onCartClick} className="hover:text-lime-400 transition relative">
             <ShoppingCart size={28} />
+            {cartItemsCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-lime-600 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                {cartItemsCount}
+              </span>
+            )}
           </button>
 
           {user ? (
@@ -36,6 +51,11 @@ export default function Navbar({ user, onLoginClick, onRegisterClick, onLogout }
               <div className="absolute right-0 mt-2 w-48 bg-neutral-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
                 <div className="p-4">
                   <p className="text-sm text-gray-300">Hola, {user.nombre}</p>
+                  {user.rol === ROL_ADMIN && (
+                    <p className="text-xs text-purple-400 mb-2 animate-pulse">
+                      👑 Administrador
+                    </p>
+                  )}
                   <button 
                     onClick={onLogout}
                     className="w-full mt-2 bg-red-600 hover:bg-red-500 text-white py-1 px-3 rounded text-sm"

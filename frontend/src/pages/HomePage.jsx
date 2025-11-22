@@ -2,21 +2,49 @@ import fondoImage from "../assets/fondo.png"
 import Navbar from "../components/Nabar";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
+import Cart from "../components/Cart";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
-import wheyImage from "../assets/wheyprotein.png";
-import creatinaImage from "../assets/crea.png";
-import preEntrenoImage from "../assets/preentreno.png";
+const API = import.meta.env.VITE_API;
 
-export default function HomePage({ user, onLoginClick, onRegisterClick, onLogout }) {
+export default function HomePage({ 
+  user, 
+  onLoginClick, 
+  onRegisterClick, 
+  onLogout, 
+  cart, 
+  onAddToCart, 
+  onRemoveFromCart, 
+  onUpdateQuantity,
+  onViewProduct,
+  onAdminClick
+}) {
+
   const [products, setProducts] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const onCartClick = () => {
+    if (!user) {
+      onLoginClick()
+    } else {
+      setIsCartOpen(true);
+    }
+  };
 
   useEffect(() => {
-    setProducts([
-      { id: 1, name: "Proteína Whey", price: 120000, image:  wheyImage },
-      { id: 2, name: "Creatina Monohidratada", price: 85000, image: creatinaImage },
-      { id: 3, name: "Pre-entreno", price: 95000, image: preEntrenoImage },
-    ]);
+    
+    const getProducts = async () => {
+      try {
+        const { data } = await axios.get(`${API}/productos`);     
+        setProducts(data);
+        
+      } catch (err) {
+        console.log("Error cargando productos", err);
+      }
+    };
+
+    getProducts();
   }, []);
 
   return (
@@ -26,6 +54,9 @@ export default function HomePage({ user, onLoginClick, onRegisterClick, onLogout
         onLoginClick={onLoginClick}
         onRegisterClick={onRegisterClick}
         onLogout={onLogout}
+        cartItemsCount={cart?.resumen?.productos_diferentes}
+        onCartClick={onCartClick}
+        onAdminClick={onAdminClick}
       />
 
       <div
@@ -54,10 +85,25 @@ export default function HomePage({ user, onLoginClick, onRegisterClick, onLogout
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard 
+              key={p.id_Producto} 
+              product={p} 
+              onAddToCart={() => onAddToCart(p, 1)}
+              onViewProduct={() => onViewProduct(p)}
+              user={user}
+              onLoginClick={onLoginClick}
+            />
           ))}
         </div>
       </div>
+
+      <Cart
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cart={cart}
+        onRemoveItem={onRemoveFromCart}
+        onUpdateQuantity={onUpdateQuantity}
+      />
 
       <Footer />
     </div>

@@ -40,6 +40,18 @@ CREATE TABLE productos (
 );
 
 USE AlixSport_db;
+CREATE TABLE sabores (
+    id_Sabor INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_Sabor VARCHAR(100) NOT NULL UNIQUE
+);
+
+USE AlixSport_db;
+CREATE TABLE categorias (
+    id_Categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_Categoria VARCHAR(100) NOT NULL UNIQUE
+);
+
+USE AlixSport_db;
 CREATE TABLE carrito (
     id_Carrito INT AUTO_INCREMENT PRIMARY KEY,
     id_Usuario INT NOT NULL,
@@ -55,10 +67,14 @@ CREATE TABLE carrito_detalle (
     cantidad INT NOT NULL DEFAULT 1,
     precio_unitario DECIMAL(10,2) NOT NULL,
     subtotal DECIMAL(10,2) GENERATED ALWAYS AS (cantidad * precio_unitario) STORED,
-    CONSTRAINT  tb_carrito_detalle_tb_carrito_fk FOREIGN KEY (id_Carrito) REFERENCES carrito(id_Usuario) ON DELETE CASCADE,
+    CONSTRAINT  tb_carrito_detalle_tb_carrito_fk FOREIGN KEY (id_Carrito) REFERENCES carrito(id_Carrito) ON DELETE CASCADE,
     CONSTRAINT  tb_carrito_detalle_tb_productos_fk FOREIGN KEY (id_Producto) REFERENCES productos(id_Producto)
 );
 
+USE AlixSport_db;
+ALTER TABLE carrito_detalle
+ADD CONSTRAINT tb_carrito_detalle_tb_carrito_fk
+FOREIGN KEY (id_Carrito) REFERENCES carrito(id_Carrito) ON DELETE CASCADE;
 
 CREATE TRIGGER before_insert_carrito_detalle
 BEFORE INSERT ON carrito_detalle
@@ -111,7 +127,36 @@ INSERT INTO carrito_detalle (id_Carrito, id_Producto, cantidad, precio_unitario)
 (2, 10, 5, 0);
 
 USE AlixSport_db;
-SELECT * FROM usuarios;  
+INSERT INTO categorias (nombre_Categoria) VALUES
+('Proteína'),
+('Creatina'),
+('Pre-Entreno'),
+('Aminoácidos / BCAA'),
+('Ganadores de Masa'),
+('Vitaminas y Minerales'),
+('Quemadores de Grasa'),
+('Recuperadores Musculares');
+
+USE AlixSport_db;
+INSERT INTO sabores (nombre_Sabor) VALUES
+('Vainilla'),
+('Chocolate'),
+('Cookies & Cream'),
+('Fresa'),
+('Banano'),
+('Caramelo'),
+('Mocha'),
+('Natural / Sin Sabor'),
+('Uva'),
+('Mora Azul (Blueberry)'),
+('Sandía'),
+('Limón'),
+('Naranja');
+
+
+
+USE AlixSport_db;
+SELECT * FROM productos;  
 
 USE AlixSport_db;
 SELECT * FROM codigos_recuperacion

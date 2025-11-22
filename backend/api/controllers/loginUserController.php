@@ -60,6 +60,7 @@ class loginUserController {
             $sql = "INSERT INTO usuarios (nombre_Usuario, email_Usuario, password_Usuario, rol) VALUES (?, ?, ?, 'CsWscYwyevms1983')";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([$data["nombre"], $data["email"], $passwordHash]);
+            $idUsuario = $this->conn->lastInsertId();
 
             $this->enviarCorreo(
                 $data["email"],
@@ -70,6 +71,17 @@ class loginUserController {
                     'email' => $data["email"]
                 ]
             );
+
+            $sqlCarrito = "SELECT id_Carrito FROM carrito WHERE id_Usuario = ?";
+            $stmt = $this->conn->prepare($sqlCarrito);
+            $stmt->execute([$idUsuario]);
+            $carrito = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$carrito) {
+                $sqlCrear = "INSERT INTO carrito (id_Usuario) VALUES (?)";
+                $stmtCrear = $this->conn->prepare($sqlCrear);
+                $stmtCrear->execute([$idUsuario]);
+            }
 
             echo json_encode(["status" => "ok", "mensaje" => "El Usuario se ha creado correctamente, revisa el correo para ver mas información"]);
         } catch (PDOException $e) {

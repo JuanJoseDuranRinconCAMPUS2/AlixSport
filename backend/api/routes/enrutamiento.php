@@ -4,6 +4,8 @@
     require_once __DIR__ . '/../controllers/loginUserController.php';
     require_once __DIR__ . '/../controllers/productosController.php';
     require_once __DIR__ . '/../controllers/carritoController.php';
+    require_once __DIR__ . '/../controllers/saboresController.php';
+    require_once __DIR__ . '/../controllers/categoriasController.php';
 
     $router = new Router();
 
@@ -18,13 +20,29 @@
     // Rutas Carrito
     $router->get('/carritos', 'carritoController@getCarrito');
     $router->get('/carritosDetail', 'carritoController@getCarritoDetalles');
-    $router->get('/carritosById', 'carritoController@getCarritoById');
-    $router->get('/DetallesByUser', 'carritoController@getDetallesByUser');
-    $router->get('/totalCarritoUser', 'carritoController@getTotalCarrito');
+    $router->post('/CantidadProductos', 'carritoController@getCantidadProductos');
+    $router->post('/carritosById', 'carritoController@getCarritoById');
+    $router->post('/DetallesByUser', 'carritoController@getDetallesByUser');
+    $router->post('/totalCarritoUser', 'carritoController@getTotalCarrito');
+    $router->post('/cambiarCantidadCarrito', 'carritoController@updateCantidadCarrito');
     $router->post('/carritos', 'carritoController@postCarrito');
     $router->delete('/carritos', 'carritoController@deleteDetalleCarrito');
     $router->delete('/vaciarCarrito', 'carritoController@vaciarCarrito');
     $router->post('/generarFactura', 'carritoController@generarFacturaPDF');
+
+    // Rutas Sabores
+    $router->get('/sabores', 'saboresController@getSabores');
+    $router->get('/saboresById', 'saboresController@getSaborById');
+    $router->post('/sabores', 'saboresController@postSabor');
+    $router->put('/sabores', 'saboresController@putSabor');
+    $router->delete('/sabores', 'saboresController@deleteSabor');
+
+    // Rutas Sabores
+    $router->get('/categorias', 'categoriasController@getCategorias');
+    $router->get('/categoriasById', 'categoriasController@getCategoriaById');
+    $router->post('/categorias', 'categoriasController@postCategoria');
+    $router->put('/categorias', 'categoriasController@putCategoria');
+    $router->delete('/categorias', 'categoriasController@deleteCategoria');
 
     //Rutas Login
     $router->get('/hola', 'loginUserController@saludar');
