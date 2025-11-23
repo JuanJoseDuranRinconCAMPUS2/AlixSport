@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, ShoppingCart } from "lucide-react";
 
-export default function Cart({ isOpen, onClose, cart, onRemoveItem, onUpdateQuantity, total }) {
+export default function Cart({ isOpen, onClose, cart, onRemoveItem, onUpdateQuantity, generarFactura }) {
   
   const formatPrice = (price) => {
     return new Intl.NumberFormat('es-CO', {
@@ -11,7 +11,6 @@ export default function Cart({ isOpen, onClose, cart, onRemoveItem, onUpdateQuan
   };
 
   console.log(cart);
-  
   
   return (
     <AnimatePresence>
@@ -118,7 +117,7 @@ export default function Cart({ isOpen, onClose, cart, onRemoveItem, onUpdateQuan
                   <span className="text-white font-bold">Total:</span>
                   <span className="text-lime-500 font-bold">{formatPrice(cart.resumen.valor_total)}</span>
                 </div>
-                <button onClick={() => { alert('Proceso de pago en desarrollo'); onClose(); }} className="w-full bg-lime-600 hover:bg-lime-500 text-black font-bold py-3 rounded-lg transition duration-200">
+                <button onClick={generarFactura} className="w-full bg-lime-600 hover:bg-lime-500 text-black font-bold py-3 rounded-lg transition duration-200">
                   Proceder al Pago
                 </button>
                 <button onClick={onClose} className="w-full border border-neutral-600 text-white hover:bg-neutral-800 font-medium py-3 rounded-lg transition">

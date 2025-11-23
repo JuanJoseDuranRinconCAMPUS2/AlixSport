@@ -18,11 +18,14 @@ export default function HomePage({
   onRemoveFromCart, 
   onUpdateQuantity,
   onViewProduct,
-  onAdminClick
+  onAdminClick,
+  setPopup,
+  setLoading
 }) {
 
   const [products, setProducts] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  
 
   const onCartClick = () => {
     if (!user) {
@@ -32,8 +35,7 @@ export default function HomePage({
     }
   };
 
-  useEffect(() => {
-    
+  useEffect(() => { 
     const getProducts = async () => {
       try {
         const { data } = await axios.get(`${API}/productos`);     
@@ -47,6 +49,45 @@ export default function HomePage({
     getProducts();
   }, []);
 
+  const generarFactura = async(e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data } = await axios.post(`${API}/generarFactura`, 
+        {
+          "idUsuario": `${user.id}`
+        }
+      );
+
+      if (data.status !== "ok") {
+        alert("Error al generar la factura");
+        return;
+      }
+
+      const pdfUrl = data.urlFactura;
+      const fecha = new Date().toISOString().replace(/[:.]/g, "-");
+      const nombreArchivo = `Factura_${user.id}_${fecha}.pdf`;
+
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = nombreArchivo;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setPopup({
+          status: "ok",
+          mensaje: "Factura descargada correctamente",
+      });
+      
+    } catch (err) {
+      console.log("Error cargando productos", err);
+    }finally { 
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-neutral-900 text-white min-h-screen flex flex-col">
       <Navbar
@@ -54,7 +95,7 @@ export default function HomePage({
         onLoginClick={onLoginClick}
         onRegisterClick={onRegisterClick}
         onLogout={onLogout}
-        cartItemsCount={cart?.resumen?.productos_diferentes}
+        cartItemsCount={cart?.resumen?.total_items}
         onCartClick={onCartClick}
         onAdminClick={onAdminClick}
       />
@@ -88,7 +129,7 @@ export default function HomePage({
             <ProductCard 
               key={p.id_Producto} 
               product={p} 
-              onAddToCart={() => onAddToCart(p, 1)}
+              onAddToCart={() => onAddToCart(p.id_Producto, 1)}
               onViewProduct={() => onViewProduct(p)}
               user={user}
               onLoginClick={onLoginClick}
@@ -103,6 +144,7 @@ export default function HomePage({
         cart={cart}
         onRemoveItem={onRemoveFromCart}
         onUpdateQuantity={onUpdateQuantity}
+        generarFactura={generarFactura}
       />
 
       <Footer />

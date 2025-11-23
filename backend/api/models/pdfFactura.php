@@ -58,15 +58,15 @@
                         <tr>
                             <td>{$p['nombre_Producto']}</td>
                             <td>{$p['cantidad']}</td>
-                            <td>$ " . number_format($p['precio_unitario'], 0, ',', '.') . "</td>
-                            <td>$ " . number_format($p['subtotal'], 0, ',', '.') . "</td>
+                            <td>COP $ " . number_format($p['precio_unitario'], 0, ',', '.') . "</td>
+                            <td>COP $ " . number_format($p['subtotal'], 0, ',', '.') . "</td>
                         </tr>";
                     }
 
             $html .= "
                 </table>
 
-                <div class='resumen-total'>TOTAL A PAGAR: $ " . number_format($total, 0, ',', '.') . "</div>
+                <div class='resumen-total'>TOTAL A PAGAR: COP $ " . number_format($total, 0, ',', '.') . "</div>
 
                 <div class='footer'>
                     Gracias por tu compra!  

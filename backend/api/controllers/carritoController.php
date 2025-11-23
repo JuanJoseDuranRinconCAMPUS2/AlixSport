@@ -388,24 +388,20 @@ class carritoController {
         }
 
         try {
-            
             ob_start();
-            $this->getDetallesByUser();
+            $this->getDetallesByUser(); 
             $detallesJSON = ob_get_clean();
-            $productos = json_decode($detallesJSON, true);
+            $respuestaDetalles = json_decode($detallesJSON, true);
 
-            if (!is_array($productos)) {
+            if (!isset($respuestaDetalles["detalle"]) || !is_array($respuestaDetalles["detalle"])) {
                 echo json_encode(["status" => "error", "mensaje" => "Error obteniendo detalles"]);
                 return;
             }
 
-            ob_start();
-            $this->getTotalCarrito();
-            $totalJSON = ob_get_clean();
-            $infoCarrito = json_decode($totalJSON, true);
+            $productos = $respuestaDetalles["detalle"];
+            $total = $respuestaDetalles["resumen"]["valor_total"];
 
-            $total = $infoCarrito["total"];
-            $idCarrito = $infoCarrito["idCarrito"];
+            $idCarrito = $productos[0]["id_Carrito"] ?? null;
 
             $sqlUser = "SELECT nombre_Usuario FROM usuarios WHERE id_Usuario = ?";
             $stmtUser = $this->conn->prepare($sqlUser);
@@ -420,11 +416,11 @@ class carritoController {
             $dompdf->setPaper('A4', 'portrait');
             $dompdf->render();
 
-            $nombrePDF = "Factura_User_" . $idUsuario . "_" . time() . ".pdf";
+            $nombrePDF = "Factura_User_" . $idUsuario . ".pdf";
             $rutaArchivo = __DIR__ . "/../facturas/" . $nombrePDF;
             file_put_contents($rutaArchivo, $dompdf->output());
 
-            $url = $_ENV["HOSTNAME"] . ":" . $_ENV["PORT_BACKEND"] . "/facturas/" . $nombrePDF;
+            $url =  "http://" . $_ENV["HOSTNAME"] . ":" . $_ENV["PORT_BACKEND"] . "/facturas/" . $nombrePDF;
 
             echo json_encode([
                 "status" => "ok",

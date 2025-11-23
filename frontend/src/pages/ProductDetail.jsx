@@ -10,7 +10,7 @@ export default function ProductDetail({ product, onBack, onAddToCart, user }) {
   const productFlavors = product.sabores?.map(s => s.nombre_Sabor) ?? ["Estándar"];
 
   const handleAddToCart = () => {
-    onAddToCart(product, quantity);
+    onAddToCart(product.id_Producto, quantity);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
   };
