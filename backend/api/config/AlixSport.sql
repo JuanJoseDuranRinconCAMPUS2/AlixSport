@@ -68,13 +68,18 @@ CREATE TABLE carrito_detalle (
     precio_unitario DECIMAL(10,2) NOT NULL,
     subtotal DECIMAL(10,2) GENERATED ALWAYS AS (cantidad * precio_unitario) STORED,
     CONSTRAINT  tb_carrito_detalle_tb_carrito_fk FOREIGN KEY (id_Carrito) REFERENCES carrito(id_Carrito) ON DELETE CASCADE,
-    CONSTRAINT  tb_carrito_detalle_tb_productos_fk FOREIGN KEY (id_Producto) REFERENCES productos(id_Producto)
+    CONSTRAINT  tb_carrito_detalle_tb_productos_fk FOREIGN KEY (id_Producto) REFERENCES productos(id_Producto) ON DELETE CASCADE
 );
 
 USE AlixSport_db;
 ALTER TABLE carrito_detalle
 ADD CONSTRAINT tb_carrito_detalle_tb_carrito_fk
 FOREIGN KEY (id_Carrito) REFERENCES carrito(id_Carrito) ON DELETE CASCADE;
+
+USE AlixSport_db;
+ALTER TABLE carrito_detalle
+ADD CONSTRAINT tb_carrito_detalle_tb_productos_fk
+FOREIGN KEY (id_Producto) REFERENCES productos(id_Producto) ON DELETE CASCADE;
 
 CREATE TRIGGER before_insert_carrito_detalle
 BEFORE INSERT ON carrito_detalle

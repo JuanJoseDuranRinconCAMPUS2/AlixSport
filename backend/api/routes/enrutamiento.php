@@ -13,7 +13,7 @@
     $router->get('/productos', 'productosController@getProductos');
     $router->get('/productosById', 'productosController@getProductoById');
     $router->post('/productos', 'productosController@postProducto');
-    $router->put('/productos', 'productosController@putProducto');
+    $router->post('/editarProductos', 'productosController@putProducto');
     $router->delete('/productos', 'productosController@deleteProducto');
 
 

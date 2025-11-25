@@ -135,7 +135,6 @@ export default function App() {
       }
     ); 
     await getCartInfoUser(user.id);
-    console.log(data);
   };
 
   const handleForgotPassword = () => {
@@ -211,7 +210,12 @@ export default function App() {
 
       {page === "admin" && (
         <AdminPanel
-          onBack={() => setPage("home")}
+          onBack={async() => {
+            await getCartInfoUser(user.id);
+            setPage("home")}
+          }
+          setPopup={setPopup}
+          setLoading={setLoading}
         />
       )}
 

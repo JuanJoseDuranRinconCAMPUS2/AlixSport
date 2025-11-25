@@ -10,8 +10,6 @@ export default function Cart({ isOpen, onClose, cart, onRemoveItem, onUpdateQuan
     }).format(price);
   };
 
-  console.log(cart);
-  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -57,7 +55,7 @@ export default function Cart({ isOpen, onClose, cart, onRemoveItem, onUpdateQuan
               ) : (
                 <div className="space-y-4">
                   {cart.detalle.map((item) => {
-                    const imgSrc = `/src/assets/${item.imagen_Producto}`;
+                    const imgSrc = `/src/assets/products/${item.imagen_Producto}`;
 
                     return (
                       <div key={item.id} className="flex gap-4 p-4 bg-neutral-800 rounded-lg">
@@ -67,7 +65,7 @@ export default function Cart({ isOpen, onClose, cart, onRemoveItem, onUpdateQuan
                           className="w-20 h-20 object-cover rounded-lg"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = "/src/assets/default.png";
+                            e.target.src = "/src/assets/products/default.png";
                           }}
                         />
 

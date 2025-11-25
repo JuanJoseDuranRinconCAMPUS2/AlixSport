@@ -5,7 +5,7 @@ export default function ProductDetail({ product, onBack, onAddToCart, user }) {
   const [selectedFlavor, setSelectedFlavor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
-  const imgSrc = `/src/assets/${product.imagen_Producto}`;
+  const imgSrc = `/src/assets/products/${product.imagen_Producto}`;
 
   const productFlavors = product.sabores?.map(s => s.nombre_Sabor) ?? ["Estándar"];
 
@@ -52,7 +52,7 @@ export default function ProductDetail({ product, onBack, onAddToCart, user }) {
                 className="w-full h-80 object-cover rounded-xl shadow-2xl"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = "/src/assets/default.png";
+                  e.target.src = "/src/assets/products/default.png";
                 }}
               />
             </div>

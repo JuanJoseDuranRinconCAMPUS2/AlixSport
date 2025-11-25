@@ -1,6 +1,6 @@
 export default function ProductCard({ product, onAddToCart, onViewProduct, user, onLoginClick }) {
 
-  const imgSrc = `/src/assets/${product.imagen_Producto}`;
+  const imgSrc = `/src/assets/products/${product.imagen_Producto}`;
   
   return (
     <div className="bg-neutral-800 rounded-lg p-4 shadow hover:scale-105 transition">
@@ -14,7 +14,7 @@ export default function ProductCard({ product, onAddToCart, onViewProduct, user,
           className="rounded-lg mb-3 w-full h-48 object-cover"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = "/src/assets/default.png";
+            e.target.src = "/src/assets/products/default.png";
           }}
         />
       </div>

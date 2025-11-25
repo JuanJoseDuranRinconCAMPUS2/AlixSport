@@ -86,17 +86,37 @@ class productosController {
 
     public function postProducto() {
         header('Content-Type: application/json');
-        $data = json_decode(file_get_contents("php://input"), true);
-        
-        if (!$data) {
+
+        if (!isset($_POST["producto"]) || !isset($_FILES["imagen"])) {
             http_response_code(400);
-            echo json_encode(["error" => "Datos inválidos o vacíos"]);
+            echo json_encode(["status" => "error", "mensaje" => "Datos o imagen faltante"]);
             return;
         }
 
-        if (!isset($data["nombre"]) || !isset($data["precio"])) {
+        $data = json_decode($_POST["producto"], true);
+
+        if (!$data) {
             http_response_code(400);
-            echo json_encode(["error" => "Nombre y precio son obligatorios"]);
+            echo json_encode(["status" => "error", "mensaje" => "JSON invalido"]);
+            return;
+        }
+
+        $imagen = $_FILES["imagen"];
+        $nombreImagen = time() . "_" . basename($imagen["name"]);
+        $rutaDestino = __DIR__ . "/../../../frontend/src/assets/products/" . $nombreImagen;
+        
+        $carpeta = realpath(__DIR__ . '/../../../frontend/src/assets/products');
+
+        if (!$carpeta) {
+            mkdir(__DIR__ . '/../../../src/assets', 0777, true);
+            $carpeta = realpath(__DIR__ . '/../../../frontend/src/assets/products');
+        }
+
+        $rutaDestino = $carpeta . "/" . $nombreImagen;
+
+        if (!move_uploaded_file($imagen["tmp_name"], $rutaDestino)) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "mensaje" => "Error al guardar la imagen"]);
             return;
         }
 
@@ -108,109 +128,135 @@ class productosController {
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
-                $data["nombre"],
-                $data["descripcion"],
-                $data["sabor"],
-                $data["precio"],
-                $data["stock"],
-                $data["imagen"],
-                $data["categoria"]
+                $data["nombre_Producto"],
+                $data["descripcion_Producto"],
+                $data["sabores"],
+                $data["precio_Producto"],
+                $data["stock_Producto"],
+                $nombreImagen,
+                $data["categoria_Producto"]
             ]);
 
-            echo json_encode(["mensaje" => "Producto creado correctamente"]);
+            echo json_encode(["status" => "ok", "mensaje" => "Producto creado correctamente"]);
         } catch (PDOException $e) {
             http_response_code(400);
-            echo json_encode(["error" => "Error al crear producto: " . $e->getMessage()]);
+            echo json_encode(["status" => "error", "mensaje" => "Error al crear producto: " . $e->getMessage()]);
         }
     }
 
-    public function putProducto() {
+    public function putProducto()
+    {
         header('Content-Type: application/json');
 
-        $data = json_decode(file_get_contents("php://input"), true);
-        $id = $data['idProducto'];
-
-        if (!$id) {
-            http_response_code(404);
-            echo json_encode(["error" => "id del producto no encontrado, envia el id por el body"]);
+        if (!isset($_POST["producto"])) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "mensaje" => "No se envió la información del producto"]);
             return;
         }
 
-        if (!$data) {
-            echo json_encode(["error" => "Datos inválidos o vacíos"]);
+        $data = json_decode($_POST["producto"], true);
+
+        if (!$data || !isset($data["id_Producto"])) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "mensaje" => "Datos inválidos o falta ID del producto"]);
             return;
         }
+
+        $id = $data["id_Producto"];
 
         try {
 
-            if (!$this->isProductoId($id)) {
-                http_response_code(404);
-                echo json_encode(["error" => "El producto con ID $id no existe"]);
-                return;
-            };
+            $nombreImagenFinal = $data["imagen_Producto"];
+
+            if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] === UPLOAD_ERR_OK) {
+
+                $nombreImagenFinal = time() . "_" . basename($_FILES["imagen"]["name"]);
+
+                $carpeta = realpath(__DIR__ . "/../../../frontend/src/assets/products");
+                if (!$carpeta) {
+                    mkdir(__DIR__ . "/../../../frontend/src/assets/products", 0777, true);
+                    $carpeta = realpath(__DIR__ . "/../../../frontend/src/assets/products");
+                }
+
+                $rutaDestino = $carpeta . "/" . $nombreImagenFinal;
+
+                if (!move_uploaded_file($_FILES["imagen"]["tmp_name"], $rutaDestino)) {
+                    http_response_code(500);
+                    echo json_encode(["status" => "error", "mensaje" => "Error al guardar la nueva imagen"]);
+                    return;
+                }
+            }
 
             $sql = "UPDATE productos SET 
-                        nombre_Producto = ?, descripcion_Producto = ?, sabor_Producto = ?, 
-                        precio_Producto = ?, stock_Producto = ?, imagen_Producto = ?, categoria_Producto = ?
+                        nombre_Producto = ?, 
+                        descripcion_Producto = ?, 
+                        sabor_Producto = ?, 
+                        precio_Producto = ?, 
+                        stock_Producto = ?, 
+                        imagen_Producto = ?, 
+                        categoria_Producto = ?
                     WHERE id_Producto = ?";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
-                $data["nombre"],
-                $data["descripcion"],
-                $data["sabor"],
-                $data["precio"],
-                $data["stock"],
-                $data["imagen"],
-                $data["categoria"],
+                $data["nombre_Producto"],
+                $data["descripcion_Producto"],
+                $data["sabores"],
+                $data["precio_Producto"],
+                $data["stock_Producto"],
+                $nombreImagenFinal,
+                $data["categoria_Producto"],
                 $id
             ]);
 
-            echo json_encode(["mensaje" => "Producto actualizado correctamente"]);
+            echo json_encode(["status" => "ok", "mensaje" => "Producto actualizado correctamente"]);
         } catch (PDOException $e) {
-            echo json_encode(["error" => "Error al actualizar producto: " . $e->getMessage()]);
+            http_response_code(500);
+            echo json_encode(["status" => "error", "mensaje" => "Error al actualizar producto: " . $e->getMessage()]);
         }
     }
+
+
 
     public function deleteProducto() {
         header('Content-Type: application/json');
 
         $data = json_decode(file_get_contents("php://input"), true);
-        $id = $data['idProducto'];
+        $id = $data['idProducto'] ?? null;
 
         if (!$id) {
-            http_response_code(404);
-            echo json_encode(["error" => "id del producto no encontrado, envia el id por el body"]);
+            http_response_code(400);
+            echo json_encode(["status" => "error", "mensaje" => "ID del producto no enviado"]);
             return;
         }
 
         try {
+            $stmt = $this->conn->prepare("SELECT imagen_Producto FROM productos WHERE id_Producto = ?");
+            $stmt->execute([$id]);
+            $nombreImagen = $stmt->fetchColumn();
 
-            if (!$this->isProductoId($id)) {
-                http_response_code(404);
-                echo json_encode(["error" => "El producto con ID $id no existe"]);
+            if (!$nombreImagen) {
+                echo json_encode(["status" => "error", "mensaje" => "El producto no existe"]);
                 return;
-            };
-            
+            }
+
             $stmt = $this->conn->prepare("DELETE FROM productos WHERE id_Producto = ?");
             $stmt->execute([$id]);
-            echo json_encode(["mensaje" => "Producto eliminado correctamente"]);
-        } catch (PDOException $e) {
-            echo json_encode(["error" => "Error al eliminar producto: " . $e->getMessage()]);
-        }
-    }
 
-    private function isProductoId($id) {
-        try {
-            $sql = "SELECT COUNT(*) FROM productos WHERE id_Producto = ?";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([$id]);
+            $stmt = $this->conn->prepare("SELECT COUNT(*) FROM productos WHERE imagen_Producto = ?");
+            $stmt->execute([$nombreImagen]);
             $count = $stmt->fetchColumn();
-            return $count > 0;
+
+            if ($count == 0) {
+                $path = __DIR__ . "/../../../frontend/src/assets/products/" . $nombreImagen;
+                if (file_exists($path)) unlink($path);
+            }
+
+            echo json_encode(["status" => "ok", "mensaje" => "Producto eliminado correctamente"]);
         } catch (PDOException $e) {
-            return false;
+            echo json_encode(["status" => "error", "mensaje" => "Error al eliminar producto: " . $e->getMessage()]);
         }
     }
-}
 
+}
 ?>
