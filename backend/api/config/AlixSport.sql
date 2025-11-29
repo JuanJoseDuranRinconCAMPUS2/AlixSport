@@ -71,16 +71,6 @@ CREATE TABLE carrito_detalle (
     CONSTRAINT  tb_carrito_detalle_tb_productos_fk FOREIGN KEY (id_Producto) REFERENCES productos(id_Producto) ON DELETE CASCADE
 );
 
-USE AlixSport_db;
-ALTER TABLE carrito_detalle
-ADD CONSTRAINT tb_carrito_detalle_tb_carrito_fk
-FOREIGN KEY (id_Carrito) REFERENCES carrito(id_Carrito) ON DELETE CASCADE;
-
-USE AlixSport_db;
-ALTER TABLE carrito_detalle
-ADD CONSTRAINT tb_carrito_detalle_tb_productos_fk
-FOREIGN KEY (id_Producto) REFERENCES productos(id_Producto) ON DELETE CASCADE;
-
 CREATE TRIGGER before_insert_carrito_detalle
 BEFORE INSERT ON carrito_detalle
 FOR EACH ROW
@@ -103,16 +93,16 @@ INSERT INTO usuarios (nombre_Usuario, email_Usuario, password_Usuario, rol) VALU
 USE AlixSport_db;
 INSERT INTO productos (nombre_Producto, descripcion_Producto, sabor_Producto, precio_Producto, stock_Producto, imagen_Producto, categoria_Producto)
 VALUES
-('Proteína Whey 1kg', 'Proteína concentrada de suero de leche 1kg.', 'Vainilla', 120000, 50, 'whey_vainilla.jpg', 'Proteína'),
-('Proteína Whey 1kg', 'Proteína concentrada de suero de leche 1kg.', 'Chocolate', 120000, 60, 'whey_chocolate.jpg', 'Proteína'),
-('Creatina 300g', 'Monohidrato de creatina pura.', 'Neutro', 80000, 40, 'creatina.jpg', 'Creatina'),
-('BCAA 400g', 'Aminoácidos de cadena ramificada.', 'Frutas Tropicales', 90000, 30, 'bcaa_tropical.jpg', 'Aminoácidos'),
-('Pre Entreno 300g', 'Suplemento pre-entrenamiento.', 'Sandía', 95000, 25, 'pre_sandia.jpg', 'Pre-entreno'),
-('Glutamina 300g', 'Apoyo a la recuperación muscular.', 'Neutro', 85000, 35, 'glutamina.jpg', 'Aminoácidos'),
-('Proteína Vegana 1kg', 'Proteína vegetal sin lactosa.', 'Vainilla', 110000, 20, 'vegana_vainilla.jpg', 'Proteína'),
-('Omega 3 120caps', 'Ácidos grasos esenciales.', 'Neutro', 60000, 80, 'omega3.jpg', 'Vitaminas'),
-('Multivitamínico 60caps', 'Vitaminas y minerales esenciales.', 'Neutro', 70000, 70, 'multivitaminico.jpg', 'Vitaminas'),
-('Barra Proteica', 'Snack con alto contenido proteico.', 'Chocolate', 5000, 200, 'barra_choco.jpg', 'Snacks');
+('Proteína Whey 1kg', 'Proteína concentrada de suero de leche 1kg.', '1,3,4', 120000, 50, 'whey_vainilla.jpg', '1'),
+('Proteína Whey 1kg', 'Proteína concentrada de suero de leche 1kg.', '2,3', 120000, 60, 'whey_chocolate.jpg', '1'),
+('Creatina 300g', 'Monohidrato de creatina pura.', '4,2', 80000, 40, 'creatina.jpg', '2'),
+('BCAA 400g', 'Aminoácidos de cadena ramificada.', '1,7', 90000, 30, 'bcaa_tropical.jpg', '3'),
+('Pre Entreno 300g', 'Suplemento pre-entrenamiento.', '8,2,3', 95000, 25, 'pre_sandia.jpg', '4'),
+('Glutamina 300g', 'Apoyo a la recuperación muscular.', '8,1', 85000, 35, 'glutamina.jpg', '3'),
+('Proteína Vegana 1kg', 'Proteína vegetal sin lactosa.', '8,4', 110000, 20, 'vegana_vainilla.jpg', '2'),
+('Omega 3 120caps', 'Ácidos grasos esenciales.', '8,2', 60000, 80, 'omega3.jpg', 'Vitaminas'),
+('Multivitamínico 60caps', 'Vitaminas y minerales esenciales.', '8,1', 70000, 70, 'multivitaminico.jpg', '5'),
+('Barra Proteica', 'Snack con alto contenido proteico.', '8,3,4', 5000, 200, 'barra_choco.jpg', '4');
 
 USE AlixSport_db;
 INSERT INTO carrito (id_Usuario) VALUES
